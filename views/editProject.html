@@ -36,16 +36,16 @@
           <form action="/update/{{.editProject.ID}}" method="POST" class="fw-bold">
             <div class="mb-3">
               <label for="inputTitle" class="form-label">Project Name</label>
-              <input type="text" id="inputTitle" class="form-control" name="title" value="{{.editProject.Title}}">
+              <input type="text" id="inputTitle" class="form-control" name="title">
             </div>
             <div class="d-flex">
               <div class="me-1 flex-fill">
                 <label for="inputStartDate"  class="form-label">Start Date</label>
-                <input type="date" id="inputStartDate" class="form-control" name="startDate" value="{{.editProject.StartDate}}">
+                <input type="date" id="inputStartDate" class="form-control" name="startDate">
               </div>
               <div class="ms-1 flex-fill">
                 <label for="inputEndDate"  class="form-label">End Date</label>
-                <input type="date" id="inputEndDate" class="form-control" name="endDate" value="{{.editProject.StartDate}}">
+                <input type="date" id="inputEndDate" class="form-control" name="endDate">
               </div>
             </div>
             <div class="mb-3">

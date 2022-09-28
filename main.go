@@ -27,7 +27,7 @@ func main() {
 	route.HandleFunc("/addMP", AddMP).Methods("POST")
 	route.HandleFunc("/myProjectDetail/{id}", MyProjectDetail).Methods("GET")
 	route.HandleFunc("/deleteMP/{id}", deleteMP).Methods("GET")
-	route.HandleFunc("/editProject/{index}", edit).Methods("GET")
+	route.HandleFunc("/editProject/{id}", edit).Methods("GET")
 	route.HandleFunc("/update/{id}", update).Methods("POST")
 
 	fmt.Println("Server Running")
@@ -201,8 +201,7 @@ func edit(w http.ResponseWriter, r *http.Request) {
 
 	id, _ := strconv.Atoi(mux.Vars(r)["id"])
 
-	err = connection.Con.QueryRow(context.Background(), "SELECT id, title, start_date, end_date, description, duration FROM tb_project WHERE id=$1", id).Scan(
-		&MPDetail.ID, &MPDetail.Title, &MPDetail.StartDate, &MPDetail.EndDate, &MPDetail.Description, &MPDetail.Duration)
+	err = connection.Con.QueryRow(context.Background(), "SELECT id, title, start_date, end_date, description, duration FROM tb_project WHERE id=$1", id).Scan(&MPDetail.ID, &MPDetail.Title, &MPDetail.StartDate, &MPDetail.EndDate, &MPDetail.Description, &MPDetail.Duration)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("message : " + err.Error()))
@@ -221,9 +220,6 @@ func update(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	id, _ := strconv.Atoi(mux.Vars(r)["id"])
-	http.Redirect(w, r, "/", http.StatusMovedPermanently)
-
 	var title = r.PostForm.Get("title")
 	var description = r.PostForm.Get("description")
 	var startDate = r.PostForm.Get("startDate")
@@ -241,13 +237,18 @@ func update(w http.ResponseWriter, r *http.Request) {
 	if days > 0 {
 		duration = strconv.FormatFloat(days, 'f', 0, 64) + " days"
 	}
+	id, _ := strconv.Atoi(mux.Vars(r)["id"])
 
-	newProject := MP{
-		Title:       title,
-		Duration:    duration,
-		Description: description,
-		ID:          id,
+	sqlStatement := `UPDATE public.tb_project SET title=$2, start_date=$3, end_date=$4, description=$5, duration=$6
+	WHERE id=$1;`
+
+	_, err = connection.Con.Exec(context.Background(), sqlStatement, id, title, parsingstartdate, parsingenddate, description, duration)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
 	}
-	dataMP[id] = newProject
 
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
